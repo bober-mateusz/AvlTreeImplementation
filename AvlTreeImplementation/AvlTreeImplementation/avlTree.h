@@ -97,6 +97,16 @@ void avlTree::Print(Node* leaf)
 		 {
 			 cout << leaf->right->data;
 		 }
+		 cout << "\t";
+		 switch (leaf->bf)
+		 {
+			case RH: cout << "RH";
+				break;
+			case LH: cout << "LH";
+				break;
+			case EH: cout << "EH";
+				break;
+		 }
 		 cout << "\n";
 		 Print(leaf->right);
 	 }
@@ -239,7 +249,7 @@ void avlTree::RotateRight(Node*& tree)
 
  void avlTree::printTree()
  {
-	 cout << "Current\tLeft\tRight\n";
+	 cout << "Current\tLeft\tRight\tBF\n";
 	 Print(root);
 	 cout << "\n";
  }

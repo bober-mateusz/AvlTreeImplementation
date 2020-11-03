@@ -54,7 +54,7 @@ int main()
 				//Display node info
 				if (theNode != nullptr)
 				{
-					cout << "Current\tLeft\tRight\n";
+					cout << "Current\tLeft\tRight\t\n";
 					cout << theNode->data << "\t";
 					if (theNode->left != nullptr)
 						cout << theNode->left->data << "\t";
