@@ -26,6 +26,7 @@ int main()
 		cout << "1. Insert Into Tree\n";
 		cout << "2. Print Tree\n";
 		cout << "3. Search Tree\n";
+		cout << "4. Delete Node\n";
 		cout << "-1. To quit\n\n";
 		cout << ":";
 		cin >> input;
@@ -73,6 +74,14 @@ int main()
 					cout << "The item does not exist!\n\n";
 				}
 				break;
+
+			}
+			case 4:
+			{
+				string insert;
+				cout << "Input your string to delete :";
+				cin >> insert;
+				myTree.DeleteItem(insert);
 			}
 		}
 		

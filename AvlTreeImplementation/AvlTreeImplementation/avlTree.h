@@ -22,6 +22,7 @@ public:
 	void InsertItem(string value);
 	void printTree();
 	Node* Search(string value);
+	void DeleteItem(string value);
 private:
 	Node* root;
 	void Insert(struct Node*& tree, string item, bool& taller);
@@ -31,8 +32,13 @@ private:
 	void RotateLeft(Node*& tree);
 	void RotateRight(Node*& tree);
 	Node* SearchItem(Node*& tree, string value);
-};
+	void Delete(Node*& tree, string value, bool& shorter);
+	void DeleteNode(Node*& tree, bool& shorter);
+	void GetPredecessor(Node* tree, string& data);
+	void DelRightBalance(Node*& tree, bool& shorter);
+	void DelLeftBalance(Node*& tree, bool& shorter);
 
+};
 
 void avlTree::Insert(Node*& tree, string item, bool& taller)
 {
@@ -185,7 +191,6 @@ void avlTree::LeftBalance(Node*& tree, bool& taller)
 		}
 
 	}
-
 void avlTree::RotateLeft(Node*& tree)
 	{
 		Node* rs;
@@ -201,7 +206,6 @@ void avlTree::RotateLeft(Node*& tree)
 			tree = rs;
 		}
 	}
-
 void avlTree::RotateRight(Node*& tree)
 	{
 		Node* ls;
@@ -217,24 +221,19 @@ void avlTree::RotateRight(Node*& tree)
 			tree = ls;
 		}
 	}
-
  avlTree::avlTree()
  {
 	 root = NULL;
  }
-
  void avlTree::InsertItem(string value)
 {
 	bool taller = false;
 	Insert(root,value, taller);
 }
-
  Node* avlTree::Search(string value)
  {
 	 return SearchItem(this->root, value);
  }
-
-
  Node* avlTree::SearchItem(Node*& tree,string value)
  {
 	 if (tree == nullptr || tree->data == value)
@@ -246,11 +245,152 @@ void avlTree::RotateRight(Node*& tree)
 	 // Key is smaller than root's key
 	 return SearchItem(root->left,value);
  }
-
  void avlTree::printTree()
  {
 	 cout << "Current\tLeft\tRight\tBF\n";
 	 Print(root);
 	 cout << "\n";
  }
+ void avlTree::DeleteItem(string value){
+	 bool shorter;
+	 Delete(root, value, shorter);
+ }
+ void avlTree::Delete(Node*& tree, string value, bool& shorter)
+ {
+	 if (tree != NULL)
+	 {
+		 if (value < tree->data)
+		 {
+			 Delete(tree->left, value, shorter);
+			 if (shorter)
+			 {
+				 switch (tree->bf)
+				 {
+				 case LH: tree->bf = EH; break;
+				 case EH: tree->bf = RH; shorter = false; break;
+				 case RH: DelRightBalance(tree, shorter); break;
+				 }
+			 }
+		 }
+		 else if (value > tree->data)
+		 {
+				Delete(tree->right, value, shorter);
+				if(shorter)
+				switch (tree->bf)
+				{
+				case LH: DelLeftBalance(tree, shorter); break;
+				case EH: tree->bf = LH; shorter = false; break;
+				case RH: tree->bf = EH; break;
+				}
+		 }
+		else 
+		{
+		 DeleteNode(tree, shorter);
+		}
+	 }
+	 else 
+	 {
+		 cout << "\n\n" << value << "Node could not be found and deleted\n\n";
+	 }
+ }
+ void avlTree::DeleteNode(Node*& tree, bool& shorter)
+ {
+	 string data;
+	 Node* tempPtr;
+	 tempPtr = tree;
+	 if (tree->left == NULL)
+	 {
+		 tree = tree->right;
+		 delete tempPtr;
+		 shorter = true;
+	 }
+	 else if (tree->right == NULL)
+	 {
+		 tree = tree->left;
+		 delete tempPtr;
+		 shorter = true;
+	 }
+	 else
+	 {
+		 GetPredecessor(tree, data);
+		 tree->data = data;
+		 Delete(tree->left, data, shorter);
+		 if (shorter)
+			 switch (tree->bf)
+			 {
+			 case LH: tree->bf = EH; break;
+			 case EH: tree->bf = RH; shorter = false; break;
+			 case RH: DelRightBalance(tree, shorter);
+			 }
+	 }
+ }
+ void avlTree::GetPredecessor(Node* tree, string& data)
+ {
+	 tree = tree->left;
+	 while (tree->right != NULL)
+	 {
+		 tree = tree->right;
+	 }
+	 data = tree->data;
+ }
+ void avlTree::DelRightBalance(Node*& tree, bool& shorter)
+ {
+	 Node* rs = tree->right;
+	 Node* ls;
 
+	 switch (rs->bf)
+	 {
+	 case RH: tree->bf = rs->bf = EH;
+		 RotateLeft(tree);
+		 shorter = true; break;
+	 case EH: tree->bf = RH;
+		 rs->bf = LH;
+		 RotateLeft(tree);
+		 shorter = false; break;
+	 case LH: ls = rs->left;
+		 switch (ls->bf)
+		 {
+		 case RH: tree->bf = LH;
+			 rs->bf = EH; break;
+		 case EH: tree->bf = rs->bf = EH;
+			 break;
+		 case LH: tree->bf = EH;
+			 rs->bf = RH; break;
+		 }
+		 ls->bf = EH;
+		 RotateRight(tree->right);
+		 RotateLeft(tree);
+		 shorter = true;
+	 }
+ }
+ void avlTree::DelLeftBalance(Node*& tree, bool& shorter)
+ {
+	 Node* ls = tree->left;
+	 Node* rs;
+	 switch (ls->bf)
+	 {
+	 case LH:  tree->bf = ls->bf = EH;
+		 RotateRight(tree);
+		 shorter = true; break;
+	 case EH: tree->bf = LH;
+		 ls->bf = RH;
+		 RotateRight(tree);
+		 shorter = false; break;
+	 case RH: rs = ls->right;
+		 switch (rs->bf)
+		 {
+		 case LH: tree->bf = RH;
+			 ls->bf = EH; break;
+		 case EH: tree->bf = ls->bf = EH;
+			 break;
+		 case RH: tree->bf = EH;
+			 ls->bf = LH; break;
+		 }
+		 rs->bf = EH;
+		 RotateLeft(tree->left);
+		 RotateRight(tree);
+		 shorter = true;
+	 }
+	
+
+ }
